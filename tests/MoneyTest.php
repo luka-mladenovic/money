@@ -1,8 +1,8 @@
 <?php
 
-namespace Lukam\Money\Tests;
+namespace Money\Tests;
 
-use Lukam\Money\Money;
+use Money\Money;
 use PHPUnit\Framework\TestCase;
 
 class MoneyTest extends TestCase

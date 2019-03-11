@@ -1,6 +1,6 @@
 <?php
 
-namespace Lukam\Money;
+namespace Money;
 
 class Money
 {

@@ -18,12 +18,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Lukam\\Money\\": "src/"
+            "Money\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Lukam\\Money\\Tests\\": "tests/"
+            "Money\\Tests\\": "tests/"
         }
     }
 }
