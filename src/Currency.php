@@ -54,9 +54,7 @@ class Currency
             return $this->data;
         }
 
-        if (is_null($currencyBag)) {
-            $currencyBag = new CurrencyBag;
-        }
+        $currencyBag = $currencyBag ?? new CurrencyBag;
 
         return $this->data = $currencyBag->load(
             $this->getCode()
