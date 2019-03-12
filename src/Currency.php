@@ -64,11 +64,11 @@ class Currency
     /**
      * Check if currency code matches the given currency
      *
-     * @param self $currency
+     * @param Money\Currency $currency
      *
      * @return bool
      */
-    public function equalsTo(self $currency)
+    public function equalsTo(Currency $currency)
     {
         return $this->getCode() == $currency->getCode();
     }
