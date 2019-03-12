@@ -71,7 +71,7 @@ class Money
      */
     protected static function validateAmount($amount)
     {
-        if (!is_numeric($amount)) {
+        if (!is_numeric($amount) || $amount != round($amount, 0)) {
             throw new InvalidAmountException;
         }
     }

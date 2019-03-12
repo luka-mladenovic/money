@@ -15,6 +15,7 @@ class MoneyTest extends TestCase
     /**
      * @test
      * @covers \Money\Money::__construct
+     * @covers \Money\Money::validateAmount
      */
     public function it_creates_new_money()
     {
@@ -58,6 +59,7 @@ class MoneyTest extends TestCase
             [null],
             [''],
             [.1],
+            [0.5],
             [['200']],
         ];
     }
@@ -65,13 +67,13 @@ class MoneyTest extends TestCase
     /**
      * @test
      * @covers \Money\Money::__construct
+     * @covers \Money\Money::validateAmount
      * @dataProvider invalidAmountDataProvider
-     *
-     * @param mixed $amount
+     * @expectedException \Money\Exceptions\InvalidAmountException
      */
     public function it_throws_an_exception_when_amount_is_invalid($amount)
     {
-        new Money(10, new Currency('eur'));
+        new Money($amount, new Currency('eur'));
     }
 
     /**
@@ -138,6 +140,7 @@ class MoneyTest extends TestCase
     /**
      * @test
      * @covers \Money\Money::compareTo
+     * @covers \Money\Money::validateCurrency
      * @dataProvider compareMoneyAmountDataProvider
      */
     public function it_compares_two_money_amounts($moneyOne, $moneyTwo, $result)
@@ -151,6 +154,7 @@ class MoneyTest extends TestCase
     /**
      * @test
      * @covers \Money\Money::compareTo
+     * @covers \Money\Money::validateCurrency
      * @expectedException \Money\Exceptions\InvalidCurrencyException
      */
     public function it_throws_an_exception_when_comparing_money_with_different_currencies()
