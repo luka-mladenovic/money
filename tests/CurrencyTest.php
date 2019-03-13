@@ -51,6 +51,11 @@ class CurrencyTest extends TestCase
             $data['code'],
             $currency->getCode()
         );
+
+        $this->assertEquals(
+            $data,
+            $currency->getData()
+        );
     }
 
     /**

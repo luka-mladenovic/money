@@ -8,11 +8,18 @@ class Calculator
      *
      * @param array $values
      *
-     * @return int
+     * @return mixed
      */
     public function add(...$values)
     {
-        return array_sum($values);
+        $this->validate($values);
+        $result = array_shift($values);
+
+        foreach ($values as $value) {
+            $result += $value;
+        }
+
+        return $result;
     }
 
     /**
@@ -20,28 +27,30 @@ class Calculator
      *
      * @param array $values
      *
-     * @return int
+     * @return mixed
      */
     public function subtract(...$values)
     {
+        $this->validate($values);
         $result = array_shift($values);
 
         foreach ($values as $value) {
-            $result-=$value;
+            $result -= $value;
         }
 
         return $result;
     }
 
     /**
-     * Multiply prodived values
+     * Multiply provided values
      *
      * @param array $values
      *
-     * @return int
+     * @return mixed
      */
     public function multiply(...$values)
     {
+        $this->validate($values);
         $result = array_shift($values);
 
         foreach ($values as $value) {
@@ -52,23 +61,58 @@ class Calculator
     }
 
     /**
-     * Divide prodived values
+     * Divide provided values
      *
      * @param array $values
      *
-     * @return int
+     * @throws \InvalidArgumentException
+     *
+     * @return mixed
      */
     public function divide(...$values)
     {
+        $this->validate($values);
         $result = array_shift($values);
 
         foreach ($values as $value) {
             if ($value == 0) {
-                throw new \Exception("Cannot divide by zero");
+                throw new \InvalidArgumentException("Cannot divide by zero");
             }
             $result /= $value;
         }
 
         return $result;
+    }
+
+    /**
+     * Round the value
+     *
+     * @param mixed $value
+     * @param int   $roundingMode
+     * @param int   $precision
+     *
+     * @return mixed
+     */
+    public function round($value, $roundingMode = PHP_ROUND_HALF_UP, $precision = 0)
+    {
+        return round($value, $precision, $roundingMode);
+    }
+
+    /**
+     * Chech the provided values type
+     *
+     * @param array $values
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return void
+     */
+    protected function validate($values)
+    {
+        foreach ($values as $value) {
+            if (!is_numeric($value)) {
+                throw new \InvalidArgumentException("Cannot perform calculation using non numeric values");
+            }
+        }
     }
 }

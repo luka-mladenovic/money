@@ -59,8 +59,7 @@ class MoneyTest extends TestCase
             [null],
             [''],
             [.1],
-            [0.5],
-            [['200']],
+            [0.5]
         ];
     }
 
@@ -82,7 +81,7 @@ class MoneyTest extends TestCase
      */
     public function it_returns_money_amount()
     {
-        $money = new Money(10, new Currency('eur'));
+        $money = new Money('10', new Currency('eur'));
 
         $this->assertEquals(
             10,
@@ -94,7 +93,7 @@ class MoneyTest extends TestCase
      * @test
      * @covers \Money\Money::getCurrency
      */
-    public function it_returns_money_currency_objext()
+    public function it_returns_money_currency_object()
     {
         $currency = new Currency('eur');
         $money    = new Money(10, $currency);
@@ -102,6 +101,20 @@ class MoneyTest extends TestCase
         $this->assertEquals(
             $currency,
             $money->getCurrency()
+        );
+    }
+
+    /**
+     * @test
+     * @covers \Money\Money::getCalculator
+     */
+    public function it_returns_money_calculator_object()
+    {
+        $money = new Money(10, new Currency('eur'));
+
+        $this->assertInstanceOf(
+            \Money\Calculator::class,
+            $money->getCalculator()
         );
     }
 
@@ -160,7 +173,7 @@ class MoneyTest extends TestCase
     public function it_throws_an_exception_when_comparing_money_with_different_currencies()
     {
         $euro = Money::eur(100);
-        $usd = Money::usd(100);
+        $usd  = Money::usd(100);
 
         $euro->compareTo($usd);
     }
@@ -232,6 +245,125 @@ class MoneyTest extends TestCase
         );
         $this->assertFalse(
             $money->lessThanOrEqual($money->instance(0))
+        );
+    }
+
+    public function addAmountsDataProvider()
+    {
+        return [
+            [Money::eur(10),Money::eur(10),20],
+            [Money::eur(-10),Money::eur(10),0],
+        ];
+    }
+
+    /**
+     * @test
+     * @covers \Money\Money::add
+     * @covers \Money\Money::calculateWith
+     * @dataProvider addAmountsDataProvider
+     */
+    public function it_adds_money_amounts($moneyOne, $moneyTwo, $result)
+    {
+        $this->assertEquals(
+            $moneyOne->add($moneyTwo)->getAmount(),
+            $result
+        );
+    }
+
+    /**
+     * @test
+     * @covers \Money\Money::add
+     * @covers \Money\Money::validateCurrency
+     * @expectedException \Money\Exceptions\InvalidCurrencyException
+     */
+    public function it_throws_an_exception_when_adding_differrent_currencies()
+    {
+        (Money::eur(10))
+            ->add(Money::usd(10));
+    }
+
+    public function subtractAmountsDataProvider()
+    {
+        return [
+            [Money::eur(10),Money::eur(10),0],
+            [Money::eur(-10),Money::eur(10),-20],
+        ];
+    }
+
+    /**
+     * @test
+     * @covers \Money\Money::subtract
+     * @covers \Money\Money::calculateWith
+     * @dataProvider subtractAmountsDataProvider
+     */
+    public function it_subtracts_money_amounts($moneyOne, $moneyTwo, $result)
+    {
+        $this->assertEquals(
+            $moneyOne->subtract($moneyTwo)->getAmount(),
+            $result
+        );
+    }
+
+    /**
+     * @test
+     * @covers \Money\Money::subtract
+     * @covers \Money\Money::validateCurrency
+     * @expectedException \Money\Exceptions\InvalidCurrencyException
+     */
+    public function it_throws_an_exception_when_subtracting_differrent_currencies()
+    {
+        (Money::eur(10))
+            ->subtract(Money::usd(10));
+    }
+
+    public function multiplyAmountDataProvider()
+    {
+        return [
+            [Money::eur(10),10,100],
+            [Money::eur(10),10,100],
+            [Money::eur(-10),10,-100],
+            [Money::eur(10),0.5,5],
+            [Money::eur(100),0.555,56,PHP_ROUND_HALF_UP],
+            [Money::eur(100),0.555,55,PHP_ROUND_HALF_DOWN],
+        ];
+    }
+
+    /**
+     * @test
+     * @covers \Money\Money::multiply
+     * @covers \Money\Money::calculateWith
+     * @dataProvider multiplyAmountDataProvider
+     */
+    public function it_multiplies_money_amounts($moneyOne, $multiplier, $result, $roundingMode = null)
+    {
+        $this->assertEquals(
+            $moneyOne->multiply($multiplier, $roundingMode)->getAmount(),
+            $result
+        );
+    }
+
+    public function divideAmountDataProvider()
+    {
+        return [
+            [Money::eur(10),10,1],
+            [Money::eur(-10),10,-1],
+            [Money::eur(10),0.5,20],
+            [Money::eur(100),24,4,PHP_ROUND_HALF_UP],
+            [Money::eur(100),33,3,PHP_ROUND_HALF_DOWN],
+        ];
+    }
+
+    /**
+     * @test
+     * @covers \Money\Money::divide
+     * @covers \Money\Money::calculateWith
+     * @dataProvider divideAmountDataProvider
+     */
+    public function it_divides_money_amounts($moneyOne, $divisor, $result, $roundingMode = null)
+    {
+        $this->assertEquals(
+            $moneyOne->divide($divisor, $roundingMode)->getAmount(),
+            $result
         );
     }
 }

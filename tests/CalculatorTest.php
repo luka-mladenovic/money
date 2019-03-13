@@ -13,15 +13,6 @@ class CalculatorTest extends TestCase
         $this->calculator = new Calculator;
     }
 
-    public function addValuesDataProvider()
-    {
-        return [
-            [[0,0],0],
-            [[-5,0],-5],
-            [[5,0],5],
-        ];
-    }
-
     /**
      * @test
      * @covers \Money\Calculator::add
@@ -34,13 +25,21 @@ class CalculatorTest extends TestCase
         );
     }
 
+    public function addValuesDataProvider()
+    {
+        return [
+            [[0,0],0],
+            [[-5,0],-5],
+            [[5,0],5],
+            [[0.5,0.5],1],
+            [['0.5',0.5],1],
+        ];
+    }
+
     /**
      * @test
      * @covers \Money\Calculator::add
      * @dataProvider addValuesDataProvider
-     *
-     * @param mixed $values
-     * @param mixed $result
      */
     public function it_adds_the_values($values, $result)
     {
@@ -57,6 +56,8 @@ class CalculatorTest extends TestCase
             [[-5,0],-5],
             [[5,5],0],
             [[-5,-5],0],
+            [[.5,5],-4.5],
+            [[-5,'-5'],0],
         ];
     }
 
@@ -76,9 +77,6 @@ class CalculatorTest extends TestCase
      * @test
      * @covers \Money\Calculator::subtract
      * @dataProvider subtractValuesDataProvider
-     *
-     * @param mixed $values
-     * @param mixed $result
      */
     public function it_subtracts_the_values($values, $result)
     {
@@ -114,9 +112,6 @@ class CalculatorTest extends TestCase
      * @test
      * @covers \Money\Calculator::multiply
      * @dataProvider multiplyValuesDataProvider
-     *
-     * @param mixed $values
-     * @param mixed $result
      */
     public function it_multiplies_the_values($values, $result)
     {
@@ -149,7 +144,7 @@ class CalculatorTest extends TestCase
     /**
      * @test
      * @covers \Money\Calculator::divide
-     * @expectedException \Exception
+     * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage Cannot divide by zero
      */
     public function it_throws_an_exception_when_dividing_by_zero()
@@ -161,9 +156,6 @@ class CalculatorTest extends TestCase
      * @test
      * @covers \Money\Calculator::divide
      * @dataProvider divideValuesDataProvider
-     *
-     * @param mixed $values
-     * @param mixed $result
      */
     public function it_divides_the_values($values, $result)
     {
@@ -171,5 +163,52 @@ class CalculatorTest extends TestCase
             $result,
             $this->calculator->divide(...$values)
         );
+    }
+
+    public function roundValueDataProvider()
+    {
+        return [
+            [0.5,0,PHP_ROUND_HALF_UP,1],
+            [0.5,0,PHP_ROUND_HALF_DOWN,0],
+            [0.55,1,PHP_ROUND_HALF_UP,0.6],
+            [0.555,2,PHP_ROUND_HALF_UP,0.56],
+            [-0.5,0,PHP_ROUND_HALF_UP,-1],
+            [-0.5,0,PHP_ROUND_HALF_DOWN,0],
+            [-0.55,1,PHP_ROUND_HALF_UP,-0.6],
+            [-0.555,2,PHP_ROUND_HALF_UP,-0.56],
+        ];
+    }
+
+    /**
+     * @test
+     * @covers \Money\Calculator::round
+     * @dataProvider roundValueDataProvider
+     */
+    public function it_rounds_a_value($value,$precision,$mode,$result)
+    {
+        $this->assertEquals(
+            $result,
+            $this->calculator->round($value,$mode,$precision)
+        );
+    }
+
+    public function invalidValuesDataProvider()
+    {
+        return [
+            [[null,null],'add'],
+            [['a',5],'subtract'],
+        ];
+    }
+
+    /**
+     * @test
+     * @covers \Money\Calculator::validate
+     * @dataProvider invalidValuesDataProvider
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Cannot perform calculation using non numeric values
+     */
+    public function it_throws_an_exception_when_values_are_invalid($values, $operation)
+    {
+        $this->calculator->{$operation}(...$values);
     }
 }

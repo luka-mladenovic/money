@@ -21,16 +21,23 @@ class Money
     protected $currency;
 
     /**
+     * Calculator
+     *
+     * @var Money\Calculator
+     */
+    protected $calculator;
+
+    /**
      * Create new money
      *
-     * @param int            $amount
+     * @param mixed          $amount
      * @param Money\Currency $currency
      */
     public function __construct($amount, Currency $currency)
     {
         static::validateAmount($amount);
 
-        $this->amount   = $amount;
+        $this->amount   = (int)$amount;
         $this->currency = $currency;
     }
 
@@ -40,7 +47,7 @@ class Money
      *
      * @param int $amount
      *
-     * @return {this}
+     * @return Money\Money
      */
     public function instance($amount)
     {
@@ -53,7 +60,7 @@ class Money
      * @param string $currency
      * @param array  $args
      *
-     * @return {this}
+     * @return Money\Money
      */
     public static function __callStatic($currency, $args)
     {
@@ -131,7 +138,7 @@ class Money
      *
      * @param Money\Money $money
      *
-     * @return integer
+     * @return int
      */
     public function compareTo(Money $money)
     {
@@ -188,5 +195,108 @@ class Money
     public function lessThanOrEqual(Money $money)
     {
         return $this->compareTo($money) != 1;
+    }
+
+    /**
+     * Return calculator instance
+     *
+     * @return Money\Calculator
+     */
+    public function getCalculator()
+    {
+        return $this->calculator ?? $this->calculator = new Calculator;
+    }
+
+    /**
+     * Add money amount and return a new
+     * money instance using the same currency
+     *
+     * @param Money\Money $money
+     *
+     * @return Money\Money
+     */
+    public function add(Money $money)
+    {
+        $this->validateCurrency(
+            $money->getCurrency()
+        );
+
+        return $this->instance(
+            $this->calculateWith(__FUNCTION__, $money->getAmount())
+        );
+    }
+
+    /**
+     * Subtract money amount and return a new
+     * money instance using the same currency
+     *
+     * @param Money\Money $money
+     *
+     * @return Money\Money
+     */
+    public function subtract(Money $money)
+    {
+        $this->validateCurrency(
+            $money->getCurrency()
+        );
+
+        return $this->instance(
+            $this->calculateWith(__FUNCTION__, $money->getAmount())
+        );
+    }
+
+    /**
+     * Multiply money amount with given value and return
+     * a new money instance using the same currency
+     *
+     * @param mixed $multiplier
+     * @param int   $roundingMode
+     *
+     * @return Money\Money
+     */
+    public function multiply($multiplier, $roundingMode = PHP_ROUND_HALF_UP)
+    {
+        return $this->instance(
+            $this->calculateWith(__FUNCTION__, $multiplier, $roundingMode)
+        );
+    }
+
+    /**
+     * Divide money amount with given value and return
+     * a new money instance using the same currency
+     *
+     * @param mixed $divisor
+     * @param int   $roundingMode
+     *
+     * @return Money\Money
+     */
+    public function divide($divisor, $roundingMode = PHP_ROUND_HALF_UP)
+    {
+        return $this->instance(
+            $this->calculateWith(__FUNCTION__, $divisor, $roundingMode)
+        );
+    }
+
+    /**
+     * Perform a calculation operation with given money object
+     *
+     * @param string   $operation
+     * @param int      $amount
+     * @param int|null $roundingMode
+     *
+     * @return int
+     */
+    protected function calculateWith($operation, $amount, $roundingMode = null)
+    {
+        $result = $this->getCalculator()->{$operation}(
+            $this->getAmount(),
+            $amount
+        );
+
+        if ($roundingMode) {
+            $result = $this->getCalculator()->round($result, $roundingMode);
+        }
+
+        return $result;
     }
 }
