@@ -51,7 +51,7 @@ class Money
      */
     public function instance($amount)
     {
-        return new static($amount,$this->currency);
+        return new static($amount, $this->currency);
     }
 
     /**
@@ -298,5 +298,25 @@ class Money
         }
 
         return $result;
+    }
+
+    /**
+     * Allocate money amount to given ratios
+     * and return an array of new money objects
+     *
+     * @param array $ratios
+     *
+     * @return array
+     */
+    public function allocate($ratios)
+    {
+        $shares = $this->getCalculator()->split(
+            $this->getAmount(),
+            $ratios
+        );
+
+        return array_map(function ($amount) {
+            return $this->instance($amount);
+        }, $shares);
     }
 }

@@ -192,11 +192,108 @@ class CalculatorTest extends TestCase
         );
     }
 
+    /**
+     * @test
+     * @covers \Money\Calculator::round
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Cannot perform calculation using non numeric values
+     */
+    public function it_throws_an_exception_when_rounding_an_invalid_value()
+    {
+        $this->calculator->round('foo');
+    }
+
+    public function splitValueDataProvider()
+    {
+        return [
+            [99, [1, 1, 1], [33, 33, 33]],
+            [100, [1, 1, 1], [34, 33, 33]],
+            [100, [1], [100]],
+            [101, [1, 1, 1], [34, 34, 33]],
+            [101, [3, 7], [30, 71]],
+            [101, [7, 3], [71, 30]],
+            [5, [3, 7], [2, 3]],
+            [5, [7, 3], [4, 1]],
+            [5, [7, 3, 0], [4, 1, 0]],
+            [2, [1, 1, 1], [1, 1, 0]],
+            [1, [1, 1], [1, 0]],
+            [-5, [7, 3], [-3, -2]],
+        ];
+    }
+
+    /**
+     * @test
+     * @covers \Money\Calculator::split
+     * @dataProvider splitValueDataProvider
+     */
+    public function it_splits_the_value($value,$ratios,$result)
+    {
+        $split = $this->calculator->split($value,$ratios);
+
+        foreach ($split as $key => $value) {
+            $this->assertEquals(
+                $result[$key],
+                $split[$key]);
+        }
+    }
+
+    public function splitValueIntoDataProvider()
+    {
+        return [
+            [99, 3, [33, 33, 33]],
+            [100, 3, [34, 33, 33]],
+            [100, 1, [100]]
+        ];
+    }
+
+    /**
+     * @test
+     * @covers \Money\Calculator::splitInto
+     * @dataProvider splitValueIntoDataProvider
+     */
+    public function it_splits_the_value_into_n_shares($value,$shareNumber,$result)
+    {
+        $split = $this->calculator->splitInto($value,$shareNumber);
+
+        foreach ($split as $key => $value) {
+            $this->assertEquals(
+                $result[$key],
+                $split[$key]);
+        }
+    }
+
+    /**
+     * @test
+     * @covers \Money\Calculator::split
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Ratio must be zero or positive
+     */
+    public function it_throws_an_exception_when_spliting_into_negative_ratio()
+    {
+        $this->calculator->split(100,[-1,5]);
+    }
+
+    /**
+     * @test
+     * @covers \Money\Calculator::split
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Sum of ratios must be greater than zero
+     */
+    public function it_throws_an_exception_when_spliting_into_empty_ratio()
+    {
+        $this->calculator->split(100,[]);
+    }
+
     public function invalidValuesDataProvider()
     {
         return [
             [[null,null],'add'],
             [['a',5],'subtract'],
+            [[5,''],'multiply'],
+            [[5,''],'divide'],
+            [['foo'],'round'],
+            [[5,['foo']],'split'],
+            [['foo',[1,1]],'split'],
         ];
     }
 

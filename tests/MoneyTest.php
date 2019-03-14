@@ -59,7 +59,7 @@ class MoneyTest extends TestCase
             [null],
             [''],
             [.1],
-            [0.5]
+            [0.5],
         ];
     }
 
@@ -365,5 +365,33 @@ class MoneyTest extends TestCase
             $moneyOne->divide($divisor, $roundingMode)->getAmount(),
             $result
         );
+    }
+
+    public function allocateAmountDataProvider()
+    {
+        return [
+            [99, [1, 1, 1], [33, 33, 33]],
+            [100, [1, 1, 1], [34, 33, 33]],
+            [-5, [7, 3], [-3, -2]],
+        ];
+    }
+
+    /**
+     * @test
+     * @covers \Money\Money::allocate
+     * @dataProvider allocateAmountDataProvider
+     */
+    public function it_allocates_the_money($amount, $ratios, $result)
+    {
+        $money = Money::eur($amount);
+
+        $allocation = $money->allocate($ratios);
+
+        foreach ($allocation as $key => $money) {
+            $this->assertEquals(
+                $money->getAmount(),
+                $result[$key]
+            );
+        }
     }
 }
