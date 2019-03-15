@@ -2,26 +2,25 @@
 
 return array(
 
-    /*
-    |--------------------------------------------------------------------------
-    | Currencies
-    |--------------------------------------------------------------------------
-    |
-    | The following is an array of currencies used in currency and price value objects
-    |
-    */
-
     'EUR' => [
+        'symbol'            => '€',
         'code'              => 'EUR',
         'name'              => 'Euro',
+        'template'          => '1 %',
         'minorUnit'         => 2,
         'numericCode'       => 978,
+        'decimalPoint'      => ',',
+        'thousandPoint'     => '.',
     ],
     'USD' => [
+        'symbol'            => '$',
         'code'              => 'USD',
         'name'              => 'US Dollar',
+        'template'          => '%1',
         'minorUnit'         => 2,
         'numericCode'       => 840,
+        'decimalPoint'      => '.',
+        'thousandPoint'     => ',',
     ],
 );
 

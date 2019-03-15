@@ -394,4 +394,39 @@ class MoneyTest extends TestCase
             );
         }
     }
+
+    /**
+     * @test
+     * @covers \Money\Money::getFormatter
+     */
+    public function it_returns_money_formatter_object()
+    {
+        $money = new Money(10, new Currency('eur'));
+
+        $this->assertInstanceOf(
+            \Money\Formatter::class,
+            $money->getFormatter()
+        );
+    }
+
+    public function formatAmountDataProvider()
+    {
+        return [
+            [Money::eur(100),'1,00 €'],
+            [Money::usd(100),'$1.00']
+        ];
+    }
+
+    /**
+     * @test
+     * @covers \Money\Money::format
+     * @dataProvider formatAmountDataProvider
+     */
+    public function it_formats_the_money($money, $result)
+    {
+        $this->assertEquals(
+            $result,
+            $money->format()
+        );
+    }
 }

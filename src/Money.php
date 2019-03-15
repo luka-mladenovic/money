@@ -21,6 +21,13 @@ class Money
     protected $currency;
 
     /**
+     * Formatter
+     *
+     * @var Money\Formatter
+     */
+    protected $formatter;
+
+    /**
      * Calculator
      *
      * @var Money\Calculator
@@ -45,7 +52,7 @@ class Money
      * Create new money instance using
      * the same currency and given amount
      *
-     * @param int $amount
+     * @param mixed $amount
      *
      * @return Money\Money
      */
@@ -117,6 +124,26 @@ class Money
     public function getCurrency()
     {
         return $this->currency;
+    }
+
+    /**
+     * Return calculator instance
+     *
+     * @return Money\Calculator
+     */
+    public function getCalculator()
+    {
+        return $this->calculator ?? $this->calculator = new Calculator;
+    }
+
+    /**
+     * Return formatter instance
+     *
+     * @return Money\Formatter
+     */
+    public function getFormatter()
+    {
+        return $this->formatter ?? $this->formatter = new Formatter;
     }
 
     /**
@@ -195,16 +222,6 @@ class Money
     public function lessThanOrEqual(Money $money)
     {
         return $this->compareTo($money) != 1;
-    }
-
-    /**
-     * Return calculator instance
-     *
-     * @return Money\Calculator
-     */
-    public function getCalculator()
-    {
-        return $this->calculator ?? $this->calculator = new Calculator;
     }
 
     /**
@@ -318,5 +335,24 @@ class Money
         return array_map(function ($amount) {
             return $this->instance($amount);
         }, $shares);
+    }
+
+    /**
+     * Format the amount as a currency string
+     *
+     * @return string
+     */
+    public function format()
+    {
+        $formatData = $this->getCurrency()->getData();
+
+        return $this->getFormatter()->format(
+            $this->getAmount(),
+            $formatData['minorUnit'],
+            $formatData['symbol'],
+            $formatData['template'],
+            $formatData['decimalPoint'],
+            $formatData['thousandPoint']
+        );
     }
 }
